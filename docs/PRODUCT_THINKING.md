@@ -87,5 +87,5 @@ Resolved the 5 blocking stack questions with the user: **Python/FastAPI + SQLite
 ### 2026-09-08 — Requirements finalized
 Resolved the 3 remaining open questions: auth is explicitly out of scope, deployment target is Render, analytics scope is the "core 4" (country/department/role/distribution). Wrote `docs/REQUIREMENTS.md` — the one-page requirements doc is now complete. Next step: architecture (`docs/ARCHITECTURE.md`) and then scaffolding the backend under TDD.
 
-### 2026-09-08 — Stack decided
-Resolved the 5 blocking stack questions with the user: **Python/FastAPI + SQLite + React (Vite)/MUI**. Remaining open questions (auth stance, deployment target, exact analytics questions) don't block writing `docs/REQUIREMENTS.md` — they can be stated as explicit decisions/scope calls within it. Next step: write `docs/REQUIREMENTS.md`.
+### 2026-09-08 — Architecture decided
+Resolved 3 architecture-level questions: a normalized `Currency` table (USD/INR, exchange rate to USD) instead of a snapshotted per-employee value; SQLAlchemy ORM + Pydantic over raw SQL; a flat backend structure (routers + a data-access module) over a layered services/repository split. Scope narrowed to two countries — United States (USD) and India (INR). Wrote `docs/ARCHITECTURE.md`. Next step: scaffold the backend under TDD, starting with the data model and seed script.
