@@ -1,1 +1,8 @@
 CLAUDE.local.md
+
+# Python
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.db

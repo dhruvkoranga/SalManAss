@@ -89,3 +89,44 @@ Resolved the 3 remaining open questions: auth is explicitly out of scope, deploy
 
 ### 2026-09-08 — Architecture decided
 Resolved 3 architecture-level questions: a normalized `Currency` table (USD/INR, exchange rate to USD) instead of a snapshotted per-employee value; SQLAlchemy ORM + Pydantic over raw SQL; a flat backend structure (routers + a data-access module) over a layered services/repository split. Scope narrowed to two countries — United States (USD) and India (INR). Wrote `docs/ARCHITECTURE.md`. Next step: scaffold the backend under TDD, starting with the data model and seed script.
+
+### 2026-09-08 — Correction: base currency for cross-currency aggregation is INR
+User specified INR, not USD, as the pivot currency for org-wide aggregates
+(department/role cuts). Updated `docs/ARCHITECTURE.md`: `Currency.exchange_rate_to_usd`
+(divisive, local units per 1 USD) became `exchange_rate_to_inr` (multiplicative, value
+of 1 unit of that currency in INR; INR row = 1.0). No code existed yet, so this was a
+docs-only fix. Also fixed a leftover issue in `docs/DESIGN_PATTERNS.md`, which still had
+Java-background framing and a Java-comparison table from before CLAUDE.md was split into
+public/local versions — moved that content into the gitignored `CLAUDE.local.md`.
+
+### 2026-09-09 — First backend TDD slices: models, schemas, FK enforcement
+Wrote `Currency`/`Employee` SQLAlchemy models and their first persistence test
+(Red confirmed via a hidden-implementation run, then Green). Added `EmployeeUpdate`
+Pydantic schema with syntactic validation (salary must be greater than zero, not
+just non-negative; required fields) — deliberately separate from semantic
+validation (does a given currency actually exist), which needs the database and
+belongs with the future CRUD layer.
+
+User then asked whether `test_employee_persists_with_its_currency` actually proved
+`currency_id` was validated. It didn't: SQLite does not enforce foreign key
+constraints by default, so an `Employee` could reference a nonexistent
+`currency_id` and SQLite would silently accept it. Proved the gap with a failing
+test first (`DID NOT RAISE IntegrityError`), then fixed it by enabling
+`PRAGMA foreign_keys=ON` via a connection event listener in `app/db.py`, and the
+same test now passes. A good example of the "grill at junctions" rule catching a
+real correctness gap, not just a hypothetical one.
+
+### 2026-09-09 — update_employee_salary(): validation loop closed
+Added `update_employee_salary()` to `app/db.py` — the deferred semantic
+"valid currency" check from the schema slice is now implemented (raises
+`InvalidCurrencyError` for an unknown currency_id, `EmployeeNotFoundError` for
+an unknown employee id; see the new Domain Exceptions pattern in
+`docs/DESIGN_PATTERNS.md`). REQUIREMENTS.md's validation criteria (no negative
+salary, valid currency, required fields) are now fully covered end to end:
+Pydantic for syntax, this function for DB-existence checks.
+
+Hit and fixed a circular import while implementing it: `app/db.py` needed to
+import `Employee`/`Currency` from `app/models.py`, which already imported
+`Base` from `app/db.py`. Extracted `Base` into its own `app/base.py` — the
+standard fix for this exact situation. Caught immediately by actually running
+the test suite, not by inspection.

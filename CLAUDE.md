@@ -91,3 +91,6 @@ Rules that follow from this:
 
 - **Plan before execute.** No file write — code, tests, docs, config, anything — happens without a proposed plan first and explicit approval from the user. This applies to every change, not just large ones.
 - **Grill at junctions.** At any real decision point — scope, architecture, tech stack, implementation-level choices, product calls — don't silently pick the reasonable-sounding option and move on. Push back, surface the tradeoffs, and make the user commit to a direction before proceeding.
+- **Commits are yours to make.** After a change is reviewed and any grilling is
+  done, the user runs `git commit`/`git push` themselves — not me. I prepare and
+  stage changes (or leave them unstaged for review) and stop there.

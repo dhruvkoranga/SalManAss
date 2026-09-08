@@ -8,9 +8,9 @@ See [REQUIREMENTS.md](REQUIREMENTS.md) for scope and [PRODUCT_THINKING.md](PRODU
 
 Employees span two countries, each tied to one currency: **United States (USD)** and
 **India (INR)**. Salaries are stored in the employee's local currency; cross-currency
-aggregates (by department, by role) convert to USD at query time using an exchange
+aggregates (by department, by role) convert to **INR** at query time using an exchange
 rate stored on the `Currency` table, rather than storing a duplicated/snapshotted
-USD value on every employee row.
+INR value on every employee row.
 
 ## Data Model
 
@@ -19,7 +19,7 @@ Currency
   id                      PK
   code                    "USD" | "INR", unique
   symbol                  "$" | "₹"
-  exchange_rate_to_usd    local currency units per 1 USD (USD = 1.0)
+  exchange_rate_to_inr    value of 1 unit of this currency, in INR (INR = 1.0)
 
 Employee
   id                      PK
@@ -48,8 +48,8 @@ GET  /api/currencies              for the edit form's currency dropdown
 GET  /api/analytics/summary       avg/median by country, department, role + distribution
 ```
 
-Cross-currency aggregates convert each row to USD via
-`salary_amount / currency.exchange_rate_to_usd` inside the SQL query — computed at
+Cross-currency aggregates convert each row to INR via
+`salary_amount * currency.exchange_rate_to_inr` inside the SQL query — computed at
 query time via a join, not a stored column. At 10,000 rows this join has no
 meaningful performance cost, so there is no need to denormalize.
 
@@ -65,15 +65,22 @@ functions.
 backend/
 ├── app/
 │   ├── main.py          FastAPI app, route registration
+│   ├── base.py           SQLAlchemy DeclarativeBase (own module to avoid a
+│   │                      circular import between models.py and db.py)
 │   ├── models.py        SQLAlchemy models (Currency, Employee)
 │   ├── schemas.py       Pydantic request/response schemas
+│   ├── exceptions.py     domain exceptions (EmployeeNotFoundError, etc.),
+│   │                      framework-agnostic, translated to HTTP by routers
 │   ├── db.py             engine/session setup + data-access functions
 │   ├── routers/
 │   │   ├── employees.py
 │   │   └── analytics.py
 │   └── seed.py            generates Currency rows + 10,000 employees
 └── tests/
-    ├── test_employees.py
+    ├── test_models.py
+    ├── test_schemas.py
+    ├── test_db.py
+    ├── test_employees.py     (routers, once built)
     ├── test_analytics.py
     └── test_seed.py
 ```
@@ -100,7 +107,7 @@ frontend/
 4. Editing a salary: frontend sends a `PUT`, the router validates the payload
    (no negative salary, valid currency), the data-access layer updates the row.
 5. The analytics endpoint runs aggregate SQL queries (`GROUP BY` country/department/
-   role, with the USD-conversion join described above) and returns precomputed
+   role, with the INR-conversion join described above) and returns precomputed
    summary numbers — no client-side aggregation of raw rows.
 
 ## Testing Strategy

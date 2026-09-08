@@ -1,34 +1,43 @@
 # Design Patterns & Coding Conventions
 
-This document tracks the patterns and idioms used in this codebase, and why — so choices stay consistent as the project grows, and so a Java developer new to Python has a reference for "why does this look different from Java."
+This document tracks the patterns and idioms used in this codebase, and why — so choices stay consistent as the project grows and future readers understand the reasoning, not just the result.
 
-> Status: project not yet started. This file will be filled in as real patterns emerge — don't pre-populate it with patterns we aren't using yet (see Simplicity First in [CLAUDE.md](../CLAUDE.md)).
+> This file is filled in as real patterns emerge — don't pre-populate it with patterns we aren't using yet (see Simplicity First in [CLAUDE.md](../CLAUDE.md)).
 
 ## Conventions
 
-- **Style**: follow [PEP 8](https://peps.python.org/pep-0008/) (Python's standard style guide — think of it as the Java equivalent of Google's Java Style Guide).
-- **Type hints**: used on function signatures for clarity, not enforced at runtime (Python's type hints are documentation + tooling support, not a compiler check like Java's).
-- **Naming**: `snake_case` for functions/variables, `PascalCase` for classes — same idea as Java's class naming, different casing for methods/variables (Java uses `camelCase`).
+- **Style**: follow [PEP 8](https://peps.python.org/pep-0008/), Python's standard style guide.
+- **Type hints**: used on function signatures for clarity; Python's type hints are documentation and tooling support, not an enforced compile-time check.
+- **Naming**: `snake_case` for functions/variables, `PascalCase` for classes.
 
 ## Patterns in Use
 
-_None yet. Each entry below should say: what the pattern is, where it's used, and why it was chosen over the alternative — added only once actually adopted, not speculatively._
+Each entry says: what the pattern is, where it's used, and why it was chosen over
+the alternative — added only once actually adopted, not speculatively.
 
-<!-- Example entry format:
-### Repository Pattern
-Used in: `src/data/`
-Why: isolates data access so storage can change without touching business logic.
--->
+### DTO / Schema Separation
+Used in: `app/models.py` (persistence) vs. `app/schemas.py` (API contract).
+Why: decouples what's stored from what's exposed over the API — either can
+change without forcing a change in the other.
 
-## Java → Python Quick Reference
+### Data Mapper
+Used in: `app/models.py`, via SQLAlchemy's declarative ORM.
+Why: `Employee`/`Currency` are plain objects with no built-in save/load
+methods; a separate `Session` (see `app/db.py`) handles all persistence.
+Keeps the model classes trivially testable without a database.
 
-| Java | Python | Note |
-|---|---|---|
-| Interface | `abc.ABC` / duck typing | Python often skips formal interfaces; duck typing is idiomatic |
-| `HashMap` | `dict` | |
-| `ArrayList` | `list` | |
-| Method overloading | default args / `*args`, `**kwargs` | Python has no overloading |
-| `static` method | `@staticmethod` / module-level function | Module-level functions are often preferred |
-| Checked exceptions | (none) | All Python exceptions are unchecked |
-| Maven/Gradle | `pip` + `requirements.txt` / `pyproject.toml` | |
-| JUnit | `pytest` | |
+### Factory Function for Session Creation
+Used in: `app/db.py`, `create_session_factory()`.
+Why: tests and the real app get differently-configured database connections
+(in-memory SQLite vs. a real file) from the same function, without
+duplicating engine/session setup logic.
+
+### Domain Exceptions
+Used in: `app/exceptions.py` (`EmployeeNotFoundError`, `InvalidCurrencyError`),
+raised from `app/db.py`'s data-access functions.
+Why: `app/db.py` has no reason to know HTTP exists. Plain Python exceptions
+keep the data-access layer usable outside a web context (e.g. from the seed
+script or a test) and let the future router layer decide how to translate
+"not found" into a 404 — the failure and its HTTP representation are
+different concerns.
+
