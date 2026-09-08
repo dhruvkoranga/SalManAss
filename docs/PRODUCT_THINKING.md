@@ -130,3 +130,16 @@ import `Employee`/`Currency` from `app/models.py`, which already imported
 `Base` from `app/db.py`. Extracted `Base` into its own `app/base.py` — the
 standard fix for this exact situation. Caught immediately by actually running
 the test suite, not by inspection.
+
+### 2026-09-09 — list_employees(): the read side (search, filter, paginate)
+Added `list_employees()` to `app/db.py` — search (name + email, case-insensitive
+via `ilike`), exact-match filters (country, department, job_title), and
+offset/limit pagination with a total count for pagination metadata. Uses a
+stable `ORDER BY` (last_name, first_name, id), since LIMIT/OFFSET pagination is
+only reliable with one.
+
+User asked for email to be included in search, which REQUIREMENTS.md didn't
+originally list — updated its in-scope line to "by name, email, country,
+department, role" rather than letting the doc silently drift from what's
+actually built. 10 tests in `test_db.py` now (3 update, 7 list/search/paginate),
+16 passing overall.

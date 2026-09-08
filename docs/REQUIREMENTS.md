@@ -10,7 +10,7 @@ HR Manager — single user of this system for the scope of this exercise.
 
 ## In Scope
 - Employee directory: search, filter, and paginate across 10,000 employees
-  (by name, country, department, role).
+  (by name, email, country, department, role).
 - View and edit an individual employee's salary record, with validation
   (no negative salary, valid currency, required fields).
 - Analytics view answering "how does the org pay people": average and
