@@ -53,7 +53,6 @@ App (once running): http://localhost:5173
 ## TODO
 
 ### Not started
-- [ ] Write one-page requirements doc (docs/REQUIREMENTS.md)
 - [ ] Scaffold backend (FastAPI app, SQLite schema, pytest setup)
 - [ ] Scaffold frontend (Vite + React + MUI)
 - [ ] Employee data model + migrations
@@ -78,3 +77,4 @@ App (once running): http://localhost:5173
 - [x] CLAUDE.md — working rules for AI-assisted development
 - [x] docs/ scaffolding — architecture, design patterns, approach, product thinking
 - [x] Problem breakdown and stack decisions (Python/FastAPI, SQLite, React/Vite/MUI)
+- [x] Write one-page requirements doc (docs/REQUIREMENTS.md)

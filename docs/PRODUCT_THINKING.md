@@ -68,11 +68,11 @@ Decided with the user rather than assumed, per [CLAUDE.md](../CLAUDE.md)'s "Thin
 
 These will be stated (with brief rationale) in `docs/REQUIREMENTS.md` and `docs/ARCHITECTURE.md` once those are written.
 
-## 5. Open Questions (still blocking REQUIREMENTS.md)
+## 5. Remaining Decisions (resolved 2026-09-08)
 
-1. **Auth** — build a minimal single-user login (even a hardcoded HR Manager account) to signal awareness of the concern, or explicitly state it's out of scope in REQUIREMENTS.md and skip entirely? Leaning toward stating it out of scope explicitly, since building real auth doesn't showcase anything the assignment is grading, but a one-line stub is cheap if it reads as more "production."
-2. **Deployment target** — needs to be free/simple and support a FastAPI backend + static/SPA frontend + SQLite. Candidates: Render, Railway, Fly.io. Still needs a decision.
-3. **"How the org pays people" — which specific questions does the analytics view need to answer?** E.g. avg/median by country, by department, by role, pay equity gaps, salary distribution histograms, top/bottom percentiles. Worth deciding 3-5 concrete questions rather than building an open-ended BI tool.
+1. **Auth**: explicitly **out of scope**, stated with reasoning in `docs/REQUIREMENTS.md`. The brief specifies a single HR Manager persona; real auth adds surface area without demonstrating anything this exercise is grading.
+2. **Deployment target**: **Render**. Free tier supports a FastAPI web service plus a static site for the React build; simple git-push deploy; SQLite file persists fine for a low-traffic single-instance demo.
+3. **Analytics scope**: **Core 4** — average/median salary by country, by department, by role, plus overall salary distribution. Directly answers "how do we pay people" without scope-creeping into an open-ended BI tool; demographic/pay-equity cuts deliberately deferred (see REQUIREMENTS.md for reasoning).
 
 ## 6. Working Log
 
@@ -80,6 +80,12 @@ Dated entries as thinking evolves — append, don't rewrite history.
 
 ### 2026-09-08 — Initial problem breakdown
 Read the assignment brief, broke down goal/persona/problem statement, drafted a scope split (in/out), and surfaced 8 open questions. Nothing built yet.
+
+### 2026-09-08 — Stack decided
+Resolved the 5 blocking stack questions with the user: **Python/FastAPI + SQLite + React (Vite)/MUI**. Remaining open questions (auth stance, deployment target, exact analytics questions) don't block writing `docs/REQUIREMENTS.md` — they can be stated as explicit decisions/scope calls within it. Next step: write `docs/REQUIREMENTS.md`.
+
+### 2026-09-08 — Requirements finalized
+Resolved the 3 remaining open questions: auth is explicitly out of scope, deployment target is Render, analytics scope is the "core 4" (country/department/role/distribution). Wrote `docs/REQUIREMENTS.md` — the one-page requirements doc is now complete. Next step: architecture (`docs/ARCHITECTURE.md`) and then scaffolding the backend under TDD.
 
 ### 2026-09-08 — Stack decided
 Resolved the 5 blocking stack questions with the user: **Python/FastAPI + SQLite + React (Vite)/MUI**. Remaining open questions (auth stance, deployment target, exact analytics questions) don't block writing `docs/REQUIREMENTS.md` — they can be stated as explicit decisions/scope calls within it. Next step: write `docs/REQUIREMENTS.md`.
