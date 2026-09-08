@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guidance for Claude Code when working in this repository. This is a **Python** project, and it's the user's **first Python project** — they come from a Java background. Explain Python idioms in terms of Java equivalents when it helps (e.g. "a Python `dict` is like a Java `HashMap`", "no static typing by default, but we use type hints — think of them as lightweight Java-style declarations").
+Guidance for Claude Code when working in this repository. This is a **Python** project.
 
 For project-specific context, see:
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system structure, modules, data flow
@@ -57,18 +57,6 @@ Rules that follow from this:
 - A bug fix gets a regression test first, reproducing the bug, before the fix goes in.
 
 ---
-
-## Beginner-Friendly Python Notes (for a Java developer)
-
-Since this is a first Python project, favor clarity over cleverness, and briefly call out Python-specific gotchas when they come up — things that don't map cleanly from Java, e.g.:
-
-- Indentation is syntactic (no braces).
-- Duck typing / no mandatory interfaces — but we still use type hints (`def foo(x: int) -> str:`) for clarity, similar in spirit to Java method signatures.
-- No method overloading — use default arguments or `*args`/`**kwargs` instead.
-- `__init__.py`, modules, and packages vs. Java's package/class file structure.
-- Virtual environments (`venv`) are Python's answer to per-project dependency isolation (loosely: Maven/Gradle's dependency scoping, but for the interpreter environment itself).
-
-Keep explanations short — a sentence or two — not a lecture. Only explain what's relevant to the code being touched.
 
 ## Environment
 
