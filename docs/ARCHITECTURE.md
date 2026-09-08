@@ -64,7 +64,10 @@ functions.
 ```
 backend/
 ├── app/
-│   ├── main.py          FastAPI app, route registration
+│   ├── main.py          FastAPI app, route registration, exception handlers
+│   ├── deps.py            real (file-based) DB wiring + get_db dependency;
+│   │                      own module so main.py and routers/ don't import
+│   │                      each other
 │   ├── base.py           SQLAlchemy DeclarativeBase (own module to avoid a
 │   │                      circular import between models.py and db.py)
 │   ├── models.py        SQLAlchemy models (Currency, Employee)
@@ -75,14 +78,15 @@ backend/
 │   ├── routers/
 │   │   ├── employees.py
 │   │   └── analytics.py
-│   └── seed.py            generates Currency rows + 10,000 employees
+│   └── seed.py            generates Currency rows + 10,000 employees (not yet built)
 └── tests/
     ├── test_models.py
     ├── test_schemas.py
     ├── test_db.py
-    ├── test_employees.py     (routers, once built)
+    ├── test_employees_router.py
     ├── test_analytics.py
-    └── test_seed.py
+    ├── test_analytics_router.py
+    └── test_seed.py          (not yet built)
 ```
 
 ## Frontend Structure
@@ -130,6 +134,18 @@ frontend/
   fetches all 10,000 rows at once.
 - SQLite is adequate at this scale for a single-instance demo; a real multi-writer
   production deployment would move to Postgres (see REQUIREMENTS.md).
+- **Analytics median/percentiles are computed in Python (`statistics` module),
+  not SQL.** SQLite has no built-in median/percentile function (unlike Postgres'
+  `percentile_cont`). At 10,000 rows, pulling matching rows into Python and
+  computing average/median/percentiles there is instant and simple — but this
+  is a deliberate scale limit, not a free lunch. `AVG()` alone would be fine to
+  push into SQL at any size; it's specifically the median calculation that
+  requires this workaround. At a much larger scale (roughly 1M+ employees),
+  this would need to change — either move to Postgres for a native
+  `percentile_cont()`, or use an approximation algorithm (e.g. t-digest) rather
+  than sorting the full dataset. Not built now, since the app is scoped at
+  10,000 employees and building for a scale that doesn't exist yet would be
+  premature (see CLAUDE.md's "Simplicity First").
 
 ## External Dependencies
 

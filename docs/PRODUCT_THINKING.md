@@ -143,3 +143,42 @@ originally list — updated its in-scope line to "by name, email, country,
 department, role" rather than letting the doc silently drift from what's
 actually built. 10 tests in `test_db.py` now (3 update, 7 list/search/paginate),
 16 passing overall.
+
+### 2026-09-09 — First running server: FastAPI router for employees
+Added `app/main.py`, `app/deps.py`, and `app/routers/employees.py` — the app
+is now an actual running server for the first time (`GET /api/employees`,
+`GET /api/employees/{id}`, `PUT /api/employees/{id}`), not just tested
+functions. Caught a second circular import before writing any code, this time
+between `main.py` (needs the router) and `routers/employees.py` (needs
+`get_db` from main) — fixed with the same pattern as the models/db.py cycle:
+extract the shared piece (`get_db` and the real database wiring) into a new
+leaf module, `app/deps.py`, that neither `main.py` nor the router depends on
+the other for.
+
+`app/db.py` gained `get_employee()`, and `update_employee_salary()` was
+refactored to reuse it instead of duplicating the not-found check.
+
+21 tests passing. Two deprecation warnings surfaced from inside the
+fastapi/starlette libraries themselves (not our code) — noted, not chased,
+since fixing them would mean guessing at dependency changes rather than
+fixing a line we actually wrote.
+
+### 2026-09-09 — Analytics endpoint: the backend API surface is complete
+Added `get_analytics_summary()` (`app/db.py`) and `GET /api/analytics/summary`.
+Chose a five-number summary (min/p25/median/p75/max) for "overall salary
+distribution" since REQUIREMENTS.md didn't specify a shape and a histogram
+would need arbitrary bucket-width decisions the requirements don't call for.
+
+Real technical constraint: SQLite has no median/percentile aggregate, so
+median and percentiles are computed in Python via the `statistics` module
+after pulling matching rows out of SQL (`AVG()` alone would not have needed
+this — only median does). User asked whether this holds up well beyond 10,000
+rows; answered honestly: it would still be correct but would get memory- and
+transfer-heavy well before it got CPU-heavy, and the real fix at large scale
+is a database with native percentile support (Postgres) or an approximation
+algorithm, not a smarter Python loop. Documented as a deliberate, stated scale
+limit in `docs/ARCHITECTURE.md`'s Performance Considerations, not a hidden one.
+
+27 tests passing. The backend API surface (employees + analytics) is now
+functionally complete; next is the seed script for real data, then the
+frontend.

@@ -1,0 +1,40 @@
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
+
+from app.db import get_employee, list_employees, update_employee_salary
+from app.deps import get_db
+from app.schemas import EmployeeListResponse, EmployeeRead, EmployeeUpdate
+
+router = APIRouter(prefix="/api/employees", tags=["employees"])
+
+
+@router.get("", response_model=EmployeeListResponse)
+def get_employees(
+    search: str | None = None,
+    country: str | None = None,
+    department: str | None = None,
+    role: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    items, total = list_employees(
+        db,
+        search=search,
+        country=country,
+        department=department,
+        job_title=role,
+        page=page,
+        page_size=page_size,
+    )
+    return EmployeeListResponse(items=items, total=total, page=page, page_size=page_size)
+
+
+@router.get("/{employee_id}", response_model=EmployeeRead)
+def get_employee_route(employee_id: int, db: Session = Depends(get_db)):
+    return get_employee(db, employee_id)
+
+
+@router.put("/{employee_id}", response_model=EmployeeRead)
+def put_employee(employee_id: int, update: EmployeeUpdate, db: Session = Depends(get_db)):
+    return update_employee_salary(db, employee_id, update)
