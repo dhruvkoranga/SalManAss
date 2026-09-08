@@ -3,6 +3,7 @@
 Guidance for Claude Code when working in this repository. This is a **Python** project.
 
 For project-specific context, see:
+- [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) — problem breakdown, scope thinking, open questions
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system structure, modules, data flow
 - [docs/DESIGN_PATTERNS.md](docs/DESIGN_PATTERNS.md) — patterns and idioms used, and why
 - [docs/APPROACH.md](docs/APPROACH.md) — decisions made along the way and their rationale
