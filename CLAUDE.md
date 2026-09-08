@@ -10,6 +10,17 @@ For project-specific context, see:
 
 ---
 
+## Guiding Principles
+
+- Think deeply before coding — surface tradeoffs, don't default to the first idea.
+- Make thoughtful, pragmatic architecture and design decisions.
+- Build systems that are maintainable and understandable, not just functional.
+- Use tools — including AI — intentionally, to raise quality and speed, not as a substitute for thinking.
+- Write production-quality code and tests.
+- Show product thinking, not just implementation — trace decisions back to the actual problem and persona, not just the ticket.
+
+---
+
 ## The 4 Core Principles
 
 ### 1. Think Before Coding
@@ -59,8 +70,23 @@ Rules that follow from this:
 
 ---
 
+## Code Style
+
+- No emoji anywhere in the codebase — code, comments, commit messages, docs, UI copy — unless explicitly asked for.
+- Comments: plain, simple English. Explain only the non-obvious *why* (a hidden constraint, a workaround, a subtle invariant) — never restate *what* the code already says.
+
+---
+
 ## Environment
 
 - OS: Windows (PowerShell primary shell).
-- Use `venv` for dependency isolation.
-- Use `pytest` for testing, `pip` + `requirements.txt` (or `pyproject.toml`, once we decide) for dependencies.
+- Repo layout: `backend/` (FastAPI + pytest + SQLite) and `frontend/` (React/Vite/MUI), each with its own dependency management.
+- Backend: `venv` for dependency isolation, `pytest` for testing.
+- Frontend: `npm` for dependency management, its own test runner (Vitest, once frontend is scaffolded).
+
+---
+
+## Working With Me (Process)
+
+- **Plan before execute.** No file write — code, tests, docs, config, anything — happens without a proposed plan first and explicit approval from the user. This applies to every change, not just large ones.
+- **Grill at junctions.** At any real decision point — scope, architecture, tech stack, implementation-level choices, product calls — don't silently pick the reasonable-sounding option and move on. Push back, surface the tradeoffs, and make the user commit to a direction before proceeding.
