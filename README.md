@@ -53,6 +53,25 @@ App (once running): http://localhost:5173
     cd frontend
     npm test
 
+## Deployment
+
+[render.yaml](render.yaml) is a Render Blueprint defining both services on the
+free tier: `salmanass-backend` (FastAPI) and `salmanass-frontend` (static
+site). To deploy: push this repo to GitHub, then in the Render dashboard use
+**New > Blueprint** and point it at the repo — Render reads `render.yaml`
+automatically.
+
+The two services' URLs are hardcoded to each other as
+`https://salmanass-<backend|frontend>.onrender.com` (`FRONTEND_ORIGIN` for
+CORS, `VITE_API_BASE_URL` for the frontend's API calls). If Render assigns
+different actual hostnames (e.g. a name collision), update those two env vars
+in the dashboard after the first deploy.
+
+**Data does not persist across restarts on the free tier** — the backend's
+start command reseeds all 10,000 employees on every boot since Render's free
+tier has no persistent disk. See `docs/APPROACH.md`'s 2026-09-09 entry for the
+full trade-off.
+
 ## TODO
 
 ### Backend
@@ -75,7 +94,7 @@ App (once running): http://localhost:5173
 - [x] Unit tests — frontend components (8 tests passing)
 
 ### Other
-- [ ] Deploy to a hosting target (TBD — Render/Railway/Fly.io)
+- [ ] Deploy to Render — `render.yaml` blueprint is ready; actual deploy is yours to trigger (see Deployment above)
 - [ ] Record video demo
 
 ### Deliberately deferred / out of scope (see docs/PRODUCT_THINKING.md)
