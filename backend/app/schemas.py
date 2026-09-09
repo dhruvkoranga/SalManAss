@@ -4,6 +4,14 @@ from decimal import Decimal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class CurrencyRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    code: str
+    symbol: str
+
+
 class EmployeeUpdate(BaseModel):
     department: str
     job_title: str

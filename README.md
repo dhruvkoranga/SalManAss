@@ -4,10 +4,11 @@ Web-based salary management software for ACME's HR team — 10,000 employees acr
 multiple countries, currently managed via spreadsheets. Built for the HR Manager
 persona to view, edit, and answer questions about org-wide pay.
 
-> **Status: backend is scaffolded and runnable** (FastAPI app, SQLite, 31 passing
-> tests) — the Backend setup steps below are verified. **Frontend is not yet
-> scaffolded**; its setup steps are still aspirational. This banner will be
-> removed once both sides are built and verified.
+> **Status: all three core pages are live end-to-end** — employee directory,
+> salary editing, and analytics — against the real 10,000-row seeded dataset
+> (FastAPI + SQLite backend, 32 passing tests; React + MUI frontend, 8 passing
+> tests). Remaining work is deployment and polish, not core functionality —
+> see TODO below.
 
 See [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) for the problem breakdown
 and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
@@ -61,16 +62,17 @@ App (once running): http://localhost:5173
 - [x] Employee list/search/filter/paginate (`GET /api/employees`)
 - [x] Single employee view/edit (`GET`/`PUT /api/employees/{id}`)
 - [x] Analytics endpoint answering "how does the org pay people" (`GET /api/analytics/summary`)
+- [x] Currency list endpoint (`GET /api/currencies`) — backs the frontend's salary display and edit dropdown
 - [x] Input validation (salary, currency, required fields)
-- [x] Unit tests — backend core logic (31 tests passing)
+- [x] Unit tests — backend core logic (32 tests passing)
 - [x] Seed script — 10,000 employees across multiple countries (`python -m scripts.seed`)
 
 ### Frontend
-- [ ] Scaffold frontend (Vite + React + MUI)
-- [ ] Employee list view (paginated, filterable, searchable)
-- [ ] Single employee view/edit
-- [ ] Analytics view
-- [ ] Unit tests — frontend components
+- [x] Scaffold frontend (Vite + React + MUI, routing via react-router-dom)
+- [x] Employee list view (paginated, filterable, searchable, currency-aware salary display)
+- [x] Single employee view/edit
+- [x] Analytics view (avg/median by country/department/role, salary distribution)
+- [x] Unit tests — frontend components (8 tests passing)
 
 ### Other
 - [ ] Deploy to a hosting target (TBD — Render/Railway/Fly.io)

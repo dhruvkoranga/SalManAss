@@ -77,8 +77,15 @@ backend/
 │   ├── db.py             engine/session setup + data-access functions
 │   ├── routers/
 │   │   ├── employees.py
-│   │   └── analytics.py
-│   └── seed.py            generates Currency rows + 10,000 employees (not yet built)
+│   │   ├── analytics.py
+│   │   └── currencies.py  read-only list, backs the edit form's currency
+│   │                      dropdown and the list view's salary display
+│   └── seed_data.py       pure data/generation logic for the seed script
+│                          (kept out of scripts/ so it's unit-testable without
+│                          touching a real database)
+├── scripts/
+│   └── seed.py            CLI: clears + repopulates Currency/Employee rows
+│                          in app.db via seed_data.build_employees()
 └── tests/
     ├── test_models.py
     ├── test_schemas.py
@@ -86,7 +93,7 @@ backend/
     ├── test_employees_router.py
     ├── test_analytics.py
     ├── test_analytics_router.py
-    └── test_seed.py          (not yet built)
+    └── test_seed_data.py
 ```
 
 ## Frontend Structure
@@ -94,13 +101,30 @@ backend/
 ```
 frontend/
 └── src/
-    ├── api/client.ts        fetch wrappers for the endpoints above
+    ├── api/client.ts        fetch wrappers + types for the endpoints above
+    ├── utils/format.ts      formatMoney() — fixed-locale currency formatting,
+    │                        shared so the locale bug below can't recur per-page
     ├── pages/
     │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter
     │   ├── EmployeeDetail.tsx   view/edit salary
     │   └── Analytics.tsx        the "how do we pay people" view
-    └── components/            shared pieces (filters, charts)
+    └── components/
+        ├── SalaryByCategoryChart.tsx    avg-vs-median grouped bar (by
+        │                                 country/department/role)
+        └── SalaryDistributionSummary.tsx  five-number-summary range bar
 ```
+
+**Locale gotcha:** `Number(x).toLocaleString(undefined, ...)` uses the
+*runtime's* default locale — on this dev machine that produced Indian-style
+digit grouping (`1,20,000.00`) instead of the intended `120,000.00`, which
+would make salary display depend on the deployed server's OS locale. Fixed by
+pinning `'en-US'` explicitly in `formatMoney()` rather than passing `undefined`.
+
+The frontend reads the backend's URL from `VITE_API_BASE_URL` (default
+`http://localhost:8000` for local dev). The backend allows that origin via
+`CORSMiddleware`, configurable through `FRONTEND_ORIGIN` — required because
+Render deploys the frontend and backend as separate services (different
+origins), not just a local-dev convenience.
 
 ## Data Flow
 
@@ -120,10 +144,12 @@ frontend/
   test (SQLAlchemy `create_all` / `drop_all`), seeded with a handful of deterministic
   rows — not the full 10,000. This keeps the suite fast and isolated, per CLAUDE.md's
   TDD rule (fast, deterministic tests).
-- The seed script has one dedicated test asserting it produces exactly 10,000 valid
-  employee rows. This test is slower by nature and is kept separate from the fast
-  unit suite. Faker is seeded with a fixed random value so the seed script's output
-  is still deterministic, not just fast.
+- `test_seed_data.py` exercises `build_employees()` at a small n (200), not the
+  full 10,000 — enough to assert correctness (unique emails, valid currency
+  refs, positive salaries, known country/department/role values) while staying
+  fast. Each test passes a seeded `random.Random` instance so results are
+  deterministic. The actual 10,000-row run only happens via `scripts/seed.py`
+  against the real database, not in the test suite.
 
 ## Performance Considerations
 
@@ -154,8 +180,16 @@ frontend/
 - **SQLAlchemy** — ORM, chosen over raw SQL for a real migrations story (Alembic)
   and to keep the codebase idiomatic for a typical FastAPI project.
 - **Pydantic** — request/response validation, ships with FastAPI.
-- **Faker** — generates realistic seed data (names, emails) instead of hand-rolled
-  random strings.
+- No new dependency for seed data — the seed script (`backend/scripts/seed.py`)
+  builds names/emails from small hand-rolled lists in `app/seed_data.py` rather
+  than adding Faker, since the volume of names needed doesn't earn a dependency.
 - **pytest** — test runner.
 - **React (Vite) + MUI** — frontend framework and component library; MUI's DataGrid
   has strong built-in support for the 10,000-row list, filtering, and pagination.
+- **react-router-dom** — routes between the three pages (employee list, employee
+  detail, analytics); the standard routing choice for a multi-page React app.
+- **@mui/x-charts** — same vendor family as the DataGrid already in use; gives
+  the Analytics page accessible SVG bar charts (tooltips, responsive sizing,
+  MUI theme integration) without hand-rolling scaling/hover/accessibility
+  logic. Chart colors follow the categorical/sequential palette from the
+  project's dataviz skill (fixed hue order, not generated per-series).

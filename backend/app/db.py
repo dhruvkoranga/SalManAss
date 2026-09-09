@@ -25,6 +25,10 @@ def create_session_factory(database_url: str, **engine_kwargs):
     return engine, sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
+def list_currencies(session: Session) -> list[Currency]:
+    return list(session.scalars(select(Currency).order_by(Currency.code)))
+
+
 def get_employee(session: Session, employee_id: int) -> Employee:
     employee = session.get(Employee, employee_id)
     if employee is None:
