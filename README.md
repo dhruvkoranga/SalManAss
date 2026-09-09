@@ -4,9 +4,10 @@ Web-based salary management software for ACME's HR team — 10,000 employees acr
 multiple countries, currently managed via spreadsheets. Built for the HR Manager
 persona to view, edit, and answer questions about org-wide pay.
 
-> **Status: scaffolding not yet built.** The commands below describe the target
-> setup once the backend/frontend are scaffolded — they are not runnable yet.
-> This banner will be removed once the steps are verified against a working repo.
+> **Status: backend is scaffolded and runnable** (FastAPI app, SQLite, 31 passing
+> tests) — the Backend setup steps below are verified. **Frontend is not yet
+> scaffolded**; its setup steps are still aspirational. This banner will be
+> removed once both sides are built and verified.
 
 See [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) for the problem breakdown
 and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
@@ -52,17 +53,26 @@ App (once running): http://localhost:5173
 
 ## TODO
 
-### Not started
-- [ ] Scaffold backend (FastAPI app, SQLite schema, pytest setup)
+### Backend
+- [x] Scaffold backend (FastAPI app, SQLite schema, pytest setup)
+- [x] Employee/Currency data models (SQLAlchemy)
+- [ ] Database migrations (Alembic) — currently using `Base.metadata.create_all()`,
+      no real migration tooling yet
+- [x] Employee list/search/filter/paginate (`GET /api/employees`)
+- [x] Single employee view/edit (`GET`/`PUT /api/employees/{id}`)
+- [x] Analytics endpoint answering "how does the org pay people" (`GET /api/analytics/summary`)
+- [x] Input validation (salary, currency, required fields)
+- [x] Unit tests — backend core logic (31 tests passing)
+- [x] Seed script — 10,000 employees across multiple countries (`python -m scripts.seed`)
+
+### Frontend
 - [ ] Scaffold frontend (Vite + React + MUI)
-- [ ] Employee data model + migrations
-- [ ] Seed script — 10,000 employees across multiple countries
-- [ ] Employee list view — paginated, filterable, searchable
+- [ ] Employee list view (paginated, filterable, searchable)
 - [ ] Single employee view/edit
-- [ ] Analytics view — answer "how does the org pay people"
-- [ ] Input validation (salary, currency, required fields)
-- [ ] Unit tests — backend core logic
+- [ ] Analytics view
 - [ ] Unit tests — frontend components
+
+### Other
 - [ ] Deploy to a hosting target (TBD — Render/Railway/Fly.io)
 - [ ] Record video demo
 
@@ -72,7 +82,7 @@ App (once running): http://localhost:5173
 - [ ] Excel import
 - [ ] Full audit-log UI
 
-### Done
+### Done (project setup)
 - [x] Git repo initialized, remote configured
 - [x] CLAUDE.md — working rules for AI-assisted development
 - [x] docs/ scaffolding — architecture, design patterns, approach, product thinking
