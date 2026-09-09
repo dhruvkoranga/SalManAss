@@ -2,7 +2,7 @@
 
 This document tracks the patterns and idioms used in this codebase, and why — so choices stay consistent as the project grows and future readers understand the reasoning, not just the result.
 
-> This file is filled in as real patterns emerge — don't pre-populate it with patterns we aren't using yet (see Simplicity First in [CLAUDE.md](../CLAUDE.md)).
+> This file is filled in as real patterns emerge — don't pre-populate it with patterns we aren't using yet (see the project's Simplicity First principle).
 
 ## Conventions
 

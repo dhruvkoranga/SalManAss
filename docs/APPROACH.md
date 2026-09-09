@@ -39,7 +39,7 @@ Each entry should be short: what was decided, why, and what alternative was cons
 
 ## 2026-09-08 — Project scaffolding: CLAUDE.md + docs structure
 
-**Decision:** Set up [CLAUDE.md](../CLAUDE.md) with four core rules (think before coding, simplicity first, surgical changes, TDD/goal-driven execution), plus separate `docs/ARCHITECTURE.md`, `docs/DESIGN_PATTERNS.md`, and this file, kept apart from CLAUDE.md itself.
+**Decision:** Set up `CLAUDE.md` with four core rules (think before coding, simplicity first, surgical changes, TDD/goal-driven execution), plus separate `docs/ARCHITECTURE.md`, `docs/DESIGN_PATTERNS.md`, and this file, kept apart from CLAUDE.md itself.
 
 **Why:** Keeps the *behavioral rules* for how Claude should work (CLAUDE.md) separate from *project knowledge* that accumulates over time (the docs/ files) — CLAUDE.md should stay stable and short, while the docs grow with the project. This is also the user's first Python project coming from Java, so CLAUDE.md includes a note to keep explanations Java-relative and beginner-friendly.
 

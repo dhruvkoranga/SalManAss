@@ -57,8 +57,8 @@ meaningful performance cost, so there is no need to denormalize.
 
 Flat structure: routers call data-access functions directly. No separate service or
 repository layer — the app is a CRUD + aggregation system, and a full layered
-architecture would be abstraction the app doesn't need yet (see CLAUDE.md's
-"Simplicity First"). Data-access functions are still plain, independently testable
+architecture would be abstraction the app doesn't need yet (the project's
+"Simplicity First" principle). Data-access functions are still plain, independently testable
 functions.
 
 ```
@@ -184,8 +184,8 @@ origins), not just a local-dev convenience.
 
 - Unit/integration tests run against a temporary SQLite database created fresh per
   test (SQLAlchemy `create_all` / `drop_all`), seeded with a handful of deterministic
-  rows — not the full 10,000. This keeps the suite fast and isolated, per CLAUDE.md's
-  TDD rule (fast, deterministic tests).
+  rows — not the full 10,000. This keeps the suite fast and isolated, per the
+  project's TDD rule (fast, deterministic tests).
 - `test_seed_data.py` exercises `build_employees()` at a small n (200), not the
   full 10,000 — enough to assert correctness (unique emails, valid currency
   refs, positive salaries, known country/department/role values) while staying
@@ -213,7 +213,7 @@ origins), not just a local-dev convenience.
   `percentile_cont()`, or use an approximation algorithm (e.g. t-digest) rather
   than sorting the full dataset. Not built now, since the app is scoped at
   10,000 employees and building for a scale that doesn't exist yet would be
-  premature (see CLAUDE.md's "Simplicity First").
+  premature (the project's "Simplicity First" principle).
 
 ## External Dependencies
 

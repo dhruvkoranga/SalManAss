@@ -24,8 +24,7 @@ and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
     SalManAss/
     ├── backend/     FastAPI app, SQLite DB, pytest tests
     ├── frontend/    React (Vite) app, MUI components
-    ├── docs/        Requirements, architecture, product thinking, decision log
-    └── CLAUDE.md    AI working rules for this repo
+    └── docs/        Requirements, architecture, product thinking, decision log
 
 ## Getting Started — Backend
 
@@ -108,7 +107,7 @@ idle (the first request after that takes ~30-60s to wake back up). See
 
 ### Other
 - [x] Deploy to Render — live at https://salmanass-frontend.onrender.com (see Deployment above)
-- [ ] Record video demo
+- [x] Record video demo
 
 ### Deliberately deferred / out of scope (see docs/PRODUCT_THINKING.md)
 - [ ] Multi-user auth / RBAC
@@ -119,7 +118,6 @@ idle (the first request after that takes ~30-60s to wake back up). See
 
 ### Done (project setup)
 - [x] Git repo initialized, remote configured
-- [x] CLAUDE.md — working rules for AI-assisted development
 - [x] docs/ scaffolding — architecture, design patterns, approach, product thinking
 - [x] Problem breakdown and stack decisions (Python/FastAPI, SQLite, React/Vite/MUI)
 - [x] Write one-page requirements doc (docs/REQUIREMENTS.md)

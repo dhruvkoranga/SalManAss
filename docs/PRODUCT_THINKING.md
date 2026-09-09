@@ -60,7 +60,7 @@ This file plus [APPROACH.md](APPROACH.md), [ARCHITECTURE.md](ARCHITECTURE.md), a
 
 ## 4. Stack Decisions (resolved 2026-09-08)
 
-Decided with the user rather than assumed, per [CLAUDE.md](../CLAUDE.md)'s "Think Before Coding" principle:
+Decided with the user rather than assumed, per the project's "Think Before Coding" principle:
 
 1. **Backend**: Python + **FastAPI**. Matches the repo's existing Python/pytest setup; async, fast to scaffold, built-in OpenAPI docs, plays well with TDD.
 2. **Database**: **SQLite**. Zero-ops, file-based, matches the assignment's own example, plenty for 10k rows and a single-user demo.
