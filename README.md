@@ -6,7 +6,7 @@ persona to view, edit, and answer questions about org-wide pay.
 
 > **Status: all three core pages are live end-to-end** — employee directory,
 > salary editing, and analytics — against the real 10,000-row seeded dataset
-> (FastAPI + SQLite backend, 32 passing tests; React + MUI frontend, 8 passing
+> (FastAPI + SQLite backend, 33 passing tests; React + MUI frontend, 8 passing
 > tests). Remaining work is deployment and polish, not core functionality —
 > see TODO below.
 
@@ -32,6 +32,7 @@ and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
     python -m venv venv
     venv\Scripts\activate
     pip install -r requirements.txt
+    alembic upgrade head
     uvicorn app.main:app --reload
 
 API docs (once running): http://localhost:8000/docs
@@ -57,14 +58,13 @@ App (once running): http://localhost:5173
 ### Backend
 - [x] Scaffold backend (FastAPI app, SQLite schema, pytest setup)
 - [x] Employee/Currency data models (SQLAlchemy)
-- [ ] Database migrations (Alembic) — currently using `Base.metadata.create_all()`,
-      no real migration tooling yet
+- [x] Database migrations (Alembic) — `alembic upgrade head` before running the app
 - [x] Employee list/search/filter/paginate (`GET /api/employees`)
 - [x] Single employee view/edit (`GET`/`PUT /api/employees/{id}`)
 - [x] Analytics endpoint answering "how does the org pay people" (`GET /api/analytics/summary`)
 - [x] Currency list endpoint (`GET /api/currencies`) — backs the frontend's salary display and edit dropdown
 - [x] Input validation (salary, currency, required fields)
-- [x] Unit tests — backend core logic (32 tests passing)
+- [x] Unit tests — backend core logic (33 tests passing)
 - [x] Seed script — 10,000 employees across multiple countries (`python -m scripts.seed`)
 
 ### Frontend

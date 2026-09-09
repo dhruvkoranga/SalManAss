@@ -1,6 +1,6 @@
 """Populate app.db with 10,000 synthetic employees for local dev/demo use.
 
-Run from backend/ with the venv active:
+Run from backend/ with the venv active (after `alembic upgrade head`):
 
     python -m scripts.seed
 
@@ -8,8 +8,7 @@ Re-running this script clears existing Employee/Currency rows first, so it's
 safe to run more than once.
 """
 
-from app.base import Base
-from app.deps import SessionLocal, engine
+from app.deps import SessionLocal
 from app.models import Currency, Employee
 from app.seed_data import CURRENCIES, build_employees
 
@@ -17,7 +16,6 @@ EMPLOYEE_COUNT = 10_000
 
 
 def main() -> None:
-    Base.metadata.create_all(engine)
     session = SessionLocal()
     try:
         session.query(Employee).delete()

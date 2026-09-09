@@ -1,10 +1,10 @@
-from app.base import Base
 from app.db import create_session_factory
 
+# Schema is owned by Alembic migrations (see backend/alembic/) — run
+# `alembic upgrade head` before starting the app, not create_all() here.
 engine, SessionLocal = create_session_factory(
     "sqlite:///./app.db", connect_args={"check_same_thread": False}
 )
-Base.metadata.create_all(engine)
 
 
 def get_db():
