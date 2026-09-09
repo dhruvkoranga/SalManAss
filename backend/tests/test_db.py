@@ -105,6 +105,18 @@ def test_list_employees_filters_by_country(db_session):
     assert items[0].country == "India"
 
 
+def test_list_employees_filters_by_country_case_insensitive(db_session):
+    usd = _create_currency(db_session)
+    inr = _create_currency(db_session, code="INR", symbol="₹", rate=1)
+    _make_employee(db_session, usd, email="us@example.com", country="United States")
+    _make_employee(db_session, inr, email="in@example.com", country="India")
+
+    items, total = list_employees(db_session, country="india")
+
+    assert total == 1
+    assert items[0].country == "India"
+
+
 def test_list_employees_filters_by_department(db_session):
     usd = _create_currency(db_session)
     _make_employee(db_session, usd, email="eng@example.com", department="Engineering")
@@ -116,12 +128,34 @@ def test_list_employees_filters_by_department(db_session):
     assert items[0].department == "Sales"
 
 
+def test_list_employees_filters_by_department_case_insensitive(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(db_session, usd, email="eng@example.com", department="Engineering")
+    _make_employee(db_session, usd, email="sales@example.com", department="Sales")
+
+    items, total = list_employees(db_session, department="sales")
+
+    assert total == 1
+    assert items[0].department == "Sales"
+
+
 def test_list_employees_filters_by_job_title(db_session):
     usd = _create_currency(db_session)
     _make_employee(db_session, usd, email="eng@example.com", job_title="Software Engineer")
     _make_employee(db_session, usd, email="mgr@example.com", job_title="Sales Manager")
 
     items, total = list_employees(db_session, job_title="Sales Manager")
+
+    assert total == 1
+    assert items[0].job_title == "Sales Manager"
+
+
+def test_list_employees_filters_by_job_title_case_insensitive(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(db_session, usd, email="eng@example.com", job_title="Software Engineer")
+    _make_employee(db_session, usd, email="mgr@example.com", job_title="Sales Manager")
+
+    items, total = list_employees(db_session, job_title="sales manager")
 
     assert total == 1
     assert items[0].job_title == "Sales Manager"

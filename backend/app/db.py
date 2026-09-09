@@ -75,11 +75,11 @@ def list_employees(
             )
         )
     if country:
-        query = query.where(Employee.country == country)
+        query = query.where(Employee.country.ilike(country))
     if department:
-        query = query.where(Employee.department == department)
+        query = query.where(Employee.department.ilike(department))
     if job_title:
-        query = query.where(Employee.job_title == job_title)
+        query = query.where(Employee.job_title.ilike(job_title))
 
     total = session.scalar(select(func.count()).select_from(query.subquery()))
 
