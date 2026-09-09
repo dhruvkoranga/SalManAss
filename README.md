@@ -4,12 +4,12 @@ Web-based salary management software for ACME's HR team — 10,000 employees acr
 multiple countries, currently managed via spreadsheets. Built for the HR Manager
 persona to view, edit, and answer questions about org-wide pay.
 
-> **Status: deployed and live** — employee directory (search, filter with
-> autocomplete suggestions, sort, view-in-any-currency), salary editing, and
-> analytics all work end-to-end against the real 10,000-row seeded dataset,
-> both locally and at https://salmanass-frontend.onrender.com (FastAPI +
-> SQLite backend, 46 passing tests; React + MUI frontend, 16 passing tests).
-> Remaining work is the video demo — see TODO below.
+> **Status: complete** — employee directory (search, filter with autocomplete
+> suggestions, sort, view-in-any-currency), salary editing, and analytics all
+> work end-to-end against the real 10,000-row seeded dataset, both locally and
+> at https://salmanass-frontend.onrender.com (FastAPI + SQLite backend, 46
+> passing tests; React + MUI frontend, 16 passing tests). See TODO below for
+> what's deliberately deferred/out of scope.
 
 See [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) for the problem breakdown
 and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
