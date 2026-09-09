@@ -78,8 +78,10 @@ backend/
 │   ├── routers/
 │   │   ├── employees.py
 │   │   ├── analytics.py
-│   │   └── currencies.py  read-only list, backs the edit form's currency
-│   │                      dropdown and the list view's salary display
+│   │   └── currencies.py  read-only list (id, code, symbol,
+│   │                      exchange_rate_to_inr) — backs the edit form's
+│   │                      currency dropdown and the list view's salary
+│   │                      display/currency-conversion selector
 │   └── seed_data.py       pure data/generation logic for the seed script
 │                          (kept out of scripts/ so it's unit-testable without
 │                          touching a real database)
@@ -118,10 +120,16 @@ would only slow the fast, isolated unit-test setup down for no benefit there.
 frontend/
 └── src/
     ├── api/client.ts        fetch wrappers + types for the endpoints above
-    ├── utils/format.ts      formatMoney() — fixed-locale currency formatting,
-    │                        shared so the locale bug below can't recur per-page
+    ├── utils/format.ts      formatMoney() (fixed-locale currency formatting,
+    │                        shared so the locale bug below can't recur per-page)
+    │                        + convertAmount() (currency conversion via INR
+    │                        as the common base, same math as the backend's
+    │                        salary sort/analytics)
     ├── pages/
-    │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter/sort
+    │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter/sort,
+    │   │                        "Display Currency" selector (client-side
+    │   │                        conversion — doesn't touch the sort, which
+    │   │                        always ranks by real INR-equivalent value)
     │   ├── EmployeeDetail.tsx   view/edit salary
     │   └── Analytics.tsx        the "how do we pay people" view
     └── components/

@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { DataGrid, type GridColDef, type GridSortModel } from '@mui/x-data-grid'
 import { useNavigate } from 'react-router-dom'
 import { fetchCurrencies, fetchEmployees, type Currency, type Employee, type EmployeeSortField } from '../api/client'
-import { formatMoney } from '../utils/format'
+import { convertAmount, formatMoney } from '../utils/format'
+
+const NATIVE_CURRENCY = 'native'
 
 type Filters = {
   search: string
@@ -23,6 +26,7 @@ export function EmployeeList() {
   const navigate = useNavigate()
 
   const [currencies, setCurrencies] = useState<Map<number, Currency>>(new Map())
+  const [displayCurrencyId, setDisplayCurrencyId] = useState<number | typeof NATIVE_CURRENCY>(NATIVE_CURRENCY)
   const [draftFilters, setDraftFilters] = useState<Filters>(EMPTY_FILTERS)
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [page, setPage] = useState(0)
@@ -76,6 +80,8 @@ export function EmployeeList() {
     setSortModel(model)
   }
 
+  const displayCurrency = displayCurrencyId === NATIVE_CURRENCY ? null : currencies.get(displayCurrencyId)
+
   // Filtering is disabled on every column (the backend has its own filter
   // params — DataGrid's built-in column filters would be UI that looks
   // functional but does nothing server-side). Sorting is enabled only on
@@ -89,12 +95,16 @@ export function EmployeeList() {
     { field: 'job_title', headerName: 'Role', flex: 1, filterable: false },
     {
       field: 'salary_amount',
-      headerName: 'Salary',
+      headerName: displayCurrency ? `Salary (${displayCurrency.code})` : 'Salary',
       flex: 1,
       filterable: false,
       renderCell: (params) => {
-        const currency = currencies.get(params.row.currency_id)
-        return formatMoney(params.row.salary_amount, currency?.symbol)
+        const nativeCurrency = currencies.get(params.row.currency_id)
+        if (!displayCurrency || !nativeCurrency) {
+          return formatMoney(params.row.salary_amount, nativeCurrency?.symbol)
+        }
+        const converted = convertAmount(params.row.salary_amount, nativeCurrency, displayCurrency)
+        return formatMoney(converted, displayCurrency.symbol)
       },
     },
     { field: 'hire_date', headerName: 'Hire Date', flex: 1, filterable: false },
@@ -135,6 +145,22 @@ export function EmployeeList() {
           Search
         </Button>
       </Stack>
+
+      <TextField
+        select
+        label="Display Currency"
+        size="small"
+        value={displayCurrencyId}
+        onChange={(e) => setDisplayCurrencyId(e.target.value === NATIVE_CURRENCY ? NATIVE_CURRENCY : Number(e.target.value))}
+        sx={{ mb: 2, minWidth: 220 }}
+      >
+        <MenuItem value={NATIVE_CURRENCY}>Native currency (per employee)</MenuItem>
+        {Array.from(currencies.values()).map((currency) => (
+          <MenuItem key={currency.id} value={currency.id}>
+            {currency.code} ({currency.symbol})
+          </MenuItem>
+        ))}
+      </TextField>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

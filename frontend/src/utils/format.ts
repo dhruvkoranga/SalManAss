@@ -8,3 +8,12 @@ export function formatMoney(amount: string | number, symbol = ''): string {
   })
   return `${symbol}${value}`
 }
+
+type CurrencyRate = { exchange_rate_to_inr: string }
+
+// Converts through INR as the common base, same as the backend's salary
+// sort/analytics: amount -> INR -> target currency.
+export function convertAmount(amount: string | number, from: CurrencyRate, to: CurrencyRate): number {
+  const amountInInr = Number(amount) * Number(from.exchange_rate_to_inr)
+  return amountInInr / Number(to.exchange_rate_to_inr)
+}

@@ -49,6 +49,7 @@ export type Currency = {
   id: number
   code: string
   symbol: string
+  exchange_rate_to_inr: string
 }
 
 export type EmployeeSortField = 'first_name' | 'last_name' | 'country' | 'job_title' | 'salary_amount' | 'hire_date'

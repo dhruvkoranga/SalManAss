@@ -1,9 +1,12 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EmployeeList } from './EmployeeList'
 
-const CURRENCIES = [{ id: 1, code: 'USD', symbol: '$' }]
+const CURRENCIES = [
+  { id: 1, code: 'USD', symbol: '$', exchange_rate_to_inr: '83' },
+  { id: 2, code: 'INR', symbol: '₹', exchange_rate_to_inr: '1' },
+]
 
 const EMPLOYEE = {
   id: 42,
@@ -105,5 +108,17 @@ describe('EmployeeList', () => {
     const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
     const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
     expect(lastCall?.[0]).not.toContain('sort_by')
+  })
+
+  it('converts the displayed salary when a display currency is chosen', async () => {
+    renderPage()
+    await screen.findByText('$120,000.00')
+
+    fireEvent.mouseDown(screen.getByLabelText('Display Currency'))
+    fireEvent.click(within(screen.getByRole('listbox')).getByText('INR (₹)'))
+
+    // 120,000 USD * 83 (INR/USD) = 9,960,000 INR
+    expect(await screen.findByText('₹9,960,000.00')).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Salary (INR)' })).toBeInTheDocument()
   })
 })

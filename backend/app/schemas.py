@@ -10,6 +10,7 @@ class CurrencyRead(BaseModel):
     id: int
     code: str
     symbol: str
+    exchange_rate_to_inr: Decimal
 
 
 class EmployeeUpdate(BaseModel):

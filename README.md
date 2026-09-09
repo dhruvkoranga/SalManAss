@@ -4,11 +4,11 @@ Web-based salary management software for ACME's HR team — 10,000 employees acr
 multiple countries, currently managed via spreadsheets. Built for the HR Manager
 persona to view, edit, and answer questions about org-wide pay.
 
-> **Status: deployed and live** — employee directory (search, filter, sort),
-> salary editing, and analytics all work end-to-end against the real
-> 10,000-row seeded dataset, both locally and at
+> **Status: deployed and live** — employee directory (search, filter, sort,
+> view-in-any-currency), salary editing, and analytics all work end-to-end
+> against the real 10,000-row seeded dataset, both locally and at
 > https://salmanass-frontend.onrender.com (FastAPI + SQLite backend, 44
-> passing tests; React + MUI frontend, 10 passing tests). Remaining work is
+> passing tests; React + MUI frontend, 15 passing tests). Remaining work is
 > the video demo — see TODO below.
 
 See [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) for the problem breakdown
@@ -88,17 +88,19 @@ idle (the first request after that takes ~30-60s to wake back up). See
       salary_amount isn't comparable across an org paid in different currencies
 - [x] Single employee view/edit (`GET`/`PUT /api/employees/{id}`)
 - [x] Analytics endpoint answering "how does the org pay people" (`GET /api/analytics/summary`)
-- [x] Currency list endpoint (`GET /api/currencies`) — backs the frontend's salary display and edit dropdown
+- [x] Currency list endpoint (`GET /api/currencies`, includes exchange_rate_to_inr)
+      — backs the frontend's salary display, edit dropdown, and currency conversion
 - [x] Input validation (salary, currency, required fields)
 - [x] Unit tests — backend core logic (44 tests passing)
 - [x] Seed script — 10,000 employees across multiple countries (`python -m scripts.seed`)
 
 ### Frontend
 - [x] Scaffold frontend (Vite + React + MUI, routing via react-router-dom)
-- [x] Employee list view (paginated, filterable, searchable, sortable, currency-aware salary display)
+- [x] Employee list view (paginated, filterable, searchable, sortable) with a
+      "Display Currency" selector to view all salaries converted to one currency
 - [x] Single employee view/edit
 - [x] Analytics view (avg/median by country/department/role, salary distribution)
-- [x] Unit tests — frontend components (10 tests passing)
+- [x] Unit tests — frontend components (15 tests passing)
 
 ### Other
 - [x] Deploy to Render — live at https://salmanass-frontend.onrender.com (see Deployment above)
