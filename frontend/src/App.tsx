@@ -20,7 +20,7 @@ function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            SalManAss
+            Salary Management Assessment
           </Typography>
           <Button color="inherit" component={Link} to="/">
             Employees
