@@ -25,6 +25,18 @@ def create_session_factory(database_url: str, **engine_kwargs):
     return engine, sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
+# Columns sortable directly on Employee. salary_amount is handled separately
+# since it needs converting to a common currency (see list_employees) before
+# it can be compared across rows.
+_SORTABLE_COLUMNS = {
+    "first_name": Employee.first_name,
+    "last_name": Employee.last_name,
+    "country": Employee.country,
+    "job_title": Employee.job_title,
+    "hire_date": Employee.hire_date,
+}
+
+
 def list_currencies(session: Session) -> list[Currency]:
     return list(session.scalars(select(Currency).order_by(Currency.code)))
 
@@ -60,6 +72,8 @@ def list_employees(
     job_title: str | None = None,
     page: int = 1,
     page_size: int = 20,
+    sort_by: str | None = None,
+    sort_order: str = "asc",
 ) -> tuple[list[Employee], int]:
     query = select(Employee)
 
@@ -81,15 +95,28 @@ def list_employees(
     if job_title:
         query = query.where(Employee.job_title.ilike(job_title))
 
+    sort_column = _SORTABLE_COLUMNS.get(sort_by)
+    if sort_by == "salary_amount":
+        # Employees are paid in different currencies, so raw salary_amount
+        # isn't comparable across rows — sort by the same INR-equivalent
+        # value the analytics endpoint uses, not the stored number.
+        query = query.join(Currency, Employee.currency_id == Currency.id)
+        sort_column = Employee.salary_amount * Currency.exchange_rate_to_inr
+
     total = session.scalar(select(func.count()).select_from(query.subquery()))
 
     # A stable ORDER BY is required for LIMIT/OFFSET to return consistent
     # pages — without one, row order (and therefore pagination) isn't
-    # guaranteed to stay the same between queries.
+    # guaranteed to stay the same between queries. Employee.id is appended
+    # as a tiebreaker for the same reason, in addition to whatever sort the
+    # caller asked for.
+    if sort_column is not None:
+        order_by_clause = (sort_column.desc() if sort_order == "desc" else sort_column.asc(), Employee.id)
+    else:
+        order_by_clause = (Employee.last_name, Employee.first_name, Employee.id)
+
     items = session.scalars(
-        query.order_by(Employee.last_name, Employee.first_name, Employee.id)
-        .offset((page - 1) * page_size)
-        .limit(page_size)
+        query.order_by(*order_by_clause).offset((page - 1) * page_size).limit(page_size)
     ).all()
 
     return list(items), total

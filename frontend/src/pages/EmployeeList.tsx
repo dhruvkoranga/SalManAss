@@ -5,9 +5,9 @@ import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { DataGrid, type GridColDef } from '@mui/x-data-grid'
+import { DataGrid, type GridColDef, type GridSortModel } from '@mui/x-data-grid'
 import { useNavigate } from 'react-router-dom'
-import { fetchCurrencies, fetchEmployees, type Currency, type Employee } from '../api/client'
+import { fetchCurrencies, fetchEmployees, type Currency, type Employee, type EmployeeSortField } from '../api/client'
 import { formatMoney } from '../utils/format'
 
 type Filters = {
@@ -27,6 +27,7 @@ export function EmployeeList() {
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(20)
+  const [sortModel, setSortModel] = useState<GridSortModel>([])
 
   const [employees, setEmployees] = useState<Employee[]>([])
   const [total, setTotal] = useState(0)
@@ -41,6 +42,8 @@ export function EmployeeList() {
       })
   }, [])
 
+  const sortItem = sortModel[0]
+
   useEffect(() => {
     setLoading(true)
     setError(null)
@@ -52,6 +55,8 @@ export function EmployeeList() {
       role: filters.role || undefined,
       page: page + 1,
       page_size: pageSize,
+      sort_by: sortItem?.field as EmployeeSortField | undefined,
+      sort_order: sortItem?.sort === 'desc' ? 'desc' : sortItem?.sort === 'asc' ? 'asc' : undefined,
     })
       .then((response) => {
         setEmployees(response.items)
@@ -59,35 +64,40 @@ export function EmployeeList() {
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
-  }, [filters, page, pageSize])
+  }, [filters, page, pageSize, sortItem?.field, sortItem?.sort])
 
   const applyFilters = () => {
     setPage(0)
     setFilters(draftFilters)
   }
 
-  // Sorting/filtering are disabled per-column: the backend has fixed
-  // ordering and its own filter params, so DataGrid's built-in controls
-  // would be UI that looks functional but does nothing server-side.
+  const handleSortModelChange = (model: GridSortModel) => {
+    setPage(0)
+    setSortModel(model)
+  }
+
+  // Filtering is disabled on every column (the backend has its own filter
+  // params — DataGrid's built-in column filters would be UI that looks
+  // functional but does nothing server-side). Sorting is enabled only on
+  // the columns the backend actually knows how to sort by.
   const columns: GridColDef<Employee>[] = [
-    { field: 'first_name', headerName: 'First Name', flex: 1, sortable: false, filterable: false },
-    { field: 'last_name', headerName: 'Last Name', flex: 1, sortable: false, filterable: false },
+    { field: 'first_name', headerName: 'First Name', flex: 1, filterable: false },
+    { field: 'last_name', headerName: 'Last Name', flex: 1, filterable: false },
     { field: 'email', headerName: 'Email', flex: 1.5, sortable: false, filterable: false },
-    { field: 'country', headerName: 'Country', flex: 1, sortable: false, filterable: false },
+    { field: 'country', headerName: 'Country', flex: 1, filterable: false },
     { field: 'department', headerName: 'Department', flex: 1, sortable: false, filterable: false },
-    { field: 'job_title', headerName: 'Role', flex: 1, sortable: false, filterable: false },
+    { field: 'job_title', headerName: 'Role', flex: 1, filterable: false },
     {
       field: 'salary_amount',
       headerName: 'Salary',
       flex: 1,
-      sortable: false,
       filterable: false,
       renderCell: (params) => {
         const currency = currencies.get(params.row.currency_id)
         return formatMoney(params.row.salary_amount, currency?.symbol)
       },
     },
-    { field: 'hire_date', headerName: 'Hire Date', flex: 1, sortable: false, filterable: false },
+    { field: 'hire_date', headerName: 'Hire Date', flex: 1, filterable: false },
   ]
 
   return (
@@ -146,6 +156,9 @@ export function EmployeeList() {
           }}
           pageSizeOptions={[20, 50, 100]}
           disableColumnMenu
+          sortingMode="server"
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
           onRowClick={(params) => navigate(`/employees/${params.id}`)}
         />
       </Box>

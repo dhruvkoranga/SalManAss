@@ -68,4 +68,42 @@ describe('EmployeeList', () => {
       expect(lastCall?.[0]).toContain('country=Germany')
     })
   })
+
+  it('re-fetches sorted ascending then descending when the First Name header is clicked', async () => {
+    renderPage()
+    await screen.findByText('Jane')
+
+    const header = screen.getByRole('columnheader', { name: 'First Name' })
+    fireEvent.click(header)
+
+    await waitFor(() => {
+      const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
+      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+      expect(lastCall?.[0]).toContain('sort_by=first_name')
+      expect(lastCall?.[0]).toContain('sort_order=asc')
+    })
+
+    fireEvent.click(header)
+
+    await waitFor(() => {
+      const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
+      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+      expect(lastCall?.[0]).toContain('sort_order=desc')
+    })
+  })
+
+  it('does not make the Email column sortable', async () => {
+    renderPage()
+    await screen.findByText('Jane')
+
+    const header = screen.getByRole('columnheader', { name: 'Email' })
+    expect(header).toHaveAttribute('aria-sort', 'none')
+
+    fireEvent.click(header)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
+    const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+    expect(lastCall?.[0]).not.toContain('sort_by')
+  })
 })

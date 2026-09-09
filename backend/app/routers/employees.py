@@ -1,3 +1,5 @@
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -6,6 +8,8 @@ from app.deps import get_db
 from app.schemas import EmployeeListResponse, EmployeeRead, EmployeeUpdate
 
 router = APIRouter(prefix="/api/employees", tags=["employees"])
+
+SortField = Literal["first_name", "last_name", "country", "job_title", "salary_amount", "hire_date"]
 
 
 @router.get("", response_model=EmployeeListResponse)
@@ -16,6 +20,8 @@ def get_employees(
     role: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
+    sort_by: SortField | None = None,
+    sort_order: Literal["asc", "desc"] = "asc",
     db: Session = Depends(get_db),
 ):
     items, total = list_employees(
@@ -26,6 +32,8 @@ def get_employees(
         job_title=role,
         page=page,
         page_size=page_size,
+        sort_by=sort_by,
+        sort_order=sort_order,
     )
     return EmployeeListResponse(items=items, total=total, page=page, page_size=page_size)
 

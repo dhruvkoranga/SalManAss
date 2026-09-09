@@ -121,7 +121,7 @@ frontend/
     ├── utils/format.ts      formatMoney() — fixed-locale currency formatting,
     │                        shared so the locale bug below can't recur per-page
     ├── pages/
-    │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter
+    │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter/sort
     │   ├── EmployeeDetail.tsx   view/edit salary
     │   └── Analytics.tsx        the "how do we pay people" view
     └── components/
@@ -144,9 +144,16 @@ origins), not just a local-dev convenience.
 
 ## Data Flow
 
-1. Frontend requests a page of employees with filters as query params.
+1. Frontend requests a page of employees with filters and sort as query params.
 2. `employees` router validates params (Pydantic), calls a data-access function in
-   `db.py`, which runs a filtered, paginated SQL query via SQLAlchemy.
+   `db.py`, which runs a filtered, sorted, paginated SQL query via SQLAlchemy.
+   Sorting is limited to a whitelist of columns (`first_name`, `last_name`,
+   `country`, `job_title`, `salary_amount`, `hire_date`); sorting by
+   `salary_amount` joins `Currency` and orders by the INR-equivalent value
+   (`salary_amount * exchange_rate_to_inr`), not the raw stored number —
+   employees are paid in different currencies, so a raw-number sort would
+   rank a junior India salary above a US director's just because the digits
+   are bigger in INR.
 3. Results are serialized through a Pydantic response schema and returned as JSON.
 4. Editing a salary: frontend sends a `PUT`, the router validates the payload
    (no negative salary, valid currency), the data-access layer updates the row.

@@ -4,11 +4,12 @@ Web-based salary management software for ACME's HR team — 10,000 employees acr
 multiple countries, currently managed via spreadsheets. Built for the HR Manager
 persona to view, edit, and answer questions about org-wide pay.
 
-> **Status: deployed and live** — employee directory, salary editing, and
-> analytics all work end-to-end against the real 10,000-row seeded dataset,
-> both locally and at https://salmanass-frontend.onrender.com (FastAPI +
-> SQLite backend, 33 passing tests; React + MUI frontend, 8 passing tests).
-> Remaining work is the video demo — see TODO below.
+> **Status: deployed and live** — employee directory (search, filter, sort),
+> salary editing, and analytics all work end-to-end against the real
+> 10,000-row seeded dataset, both locally and at
+> https://salmanass-frontend.onrender.com (FastAPI + SQLite backend, 44
+> passing tests; React + MUI frontend, 10 passing tests). Remaining work is
+> the video demo — see TODO below.
 
 See [docs/PRODUCT_THINKING.md](docs/PRODUCT_THINKING.md) for the problem breakdown
 and [docs/APPROACH.md](docs/APPROACH.md) for the decision log.
@@ -82,20 +83,22 @@ idle (the first request after that takes ~30-60s to wake back up). See
 - [x] Scaffold backend (FastAPI app, SQLite schema, pytest setup)
 - [x] Employee/Currency data models (SQLAlchemy)
 - [x] Database migrations (Alembic) — `alembic upgrade head` before running the app
-- [x] Employee list/search/filter/paginate (`GET /api/employees`)
+- [x] Employee list/search/filter/sort/paginate (`GET /api/employees`) — sorting
+      by salary uses the INR-equivalent value (join to Currency), since raw
+      salary_amount isn't comparable across an org paid in different currencies
 - [x] Single employee view/edit (`GET`/`PUT /api/employees/{id}`)
 - [x] Analytics endpoint answering "how does the org pay people" (`GET /api/analytics/summary`)
 - [x] Currency list endpoint (`GET /api/currencies`) — backs the frontend's salary display and edit dropdown
 - [x] Input validation (salary, currency, required fields)
-- [x] Unit tests — backend core logic (33 tests passing)
+- [x] Unit tests — backend core logic (44 tests passing)
 - [x] Seed script — 10,000 employees across multiple countries (`python -m scripts.seed`)
 
 ### Frontend
 - [x] Scaffold frontend (Vite + React + MUI, routing via react-router-dom)
-- [x] Employee list view (paginated, filterable, searchable, currency-aware salary display)
+- [x] Employee list view (paginated, filterable, searchable, sortable, currency-aware salary display)
 - [x] Single employee view/edit
 - [x] Analytics view (avg/median by country/department/role, salary distribution)
-- [x] Unit tests — frontend components (8 tests passing)
+- [x] Unit tests — frontend components (10 tests passing)
 
 ### Other
 - [x] Deploy to Render — live at https://salmanass-frontend.onrender.com (see Deployment above)

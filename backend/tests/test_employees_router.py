@@ -98,3 +98,40 @@ def test_put_employee_rejects_unknown_currency(client, db_session):
     )
 
     assert response.status_code == 400
+
+
+def test_get_employees_sorts_by_first_name_descending(client, db_session):
+    currency = Currency(code="USD", symbol="$", exchange_rate_to_inr=83)
+    db_session.add(currency)
+    db_session.flush()
+    for name in ["Alice", "Charlie", "Bob"]:
+        db_session.add(
+            Employee(
+                first_name=name,
+                last_name="Test",
+                email=f"{name.lower()}@example.com",
+                country="United States",
+                department="Engineering",
+                job_title="Software Engineer",
+                salary_amount=Decimal("100000"),
+                currency_id=currency.id,
+                hire_date=date(2023, 1, 15),
+            )
+        )
+    db_session.commit()
+
+    response = client.get("/api/employees?sort_by=first_name&sort_order=desc")
+
+    assert response.status_code == 200
+    names = [item["first_name"] for item in response.json()["items"]]
+    assert names == ["Charlie", "Bob", "Alice"]
+
+
+def test_get_employees_rejects_unknown_sort_by(client):
+    response = client.get("/api/employees?sort_by=not_a_real_field")
+    assert response.status_code == 422
+
+
+def test_get_employees_rejects_unknown_sort_order(client):
+    response = client.get("/api/employees?sort_order=sideways")
+    assert response.status_code == 422

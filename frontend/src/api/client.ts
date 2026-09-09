@@ -51,6 +51,9 @@ export type Currency = {
   symbol: string
 }
 
+export type EmployeeSortField = 'first_name' | 'last_name' | 'country' | 'job_title' | 'salary_amount' | 'hire_date'
+export type SortOrder = 'asc' | 'desc'
+
 export type EmployeeListParams = {
   search?: string
   country?: string
@@ -58,6 +61,8 @@ export type EmployeeListParams = {
   role?: string
   page: number
   page_size: number
+  sort_by?: EmployeeSortField
+  sort_order?: SortOrder
 }
 
 export function fetchEmployees(params: EmployeeListParams): Promise<EmployeeListResponse> {
@@ -68,6 +73,10 @@ export function fetchEmployees(params: EmployeeListParams): Promise<EmployeeList
   if (params.role) query.set('role', params.role)
   query.set('page', String(params.page))
   query.set('page_size', String(params.page_size))
+  if (params.sort_by) {
+    query.set('sort_by', params.sort_by)
+    query.set('sort_order', params.sort_order ?? 'asc')
+  }
 
   return apiGet<EmployeeListResponse>(`/api/employees?${query}`)
 }

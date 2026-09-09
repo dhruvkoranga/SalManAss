@@ -201,3 +201,62 @@ def test_list_employees_paginates(db_session):
     assert len(first_page) == 2
     assert len(second_page) == 2
     assert {e.id for e in first_page}.isdisjoint({e.id for e in second_page})
+
+
+def test_list_employees_sorts_by_first_name_ascending(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(db_session, usd, first_name="Charlie", email="c@example.com")
+    _make_employee(db_session, usd, first_name="Alice", email="a@example.com")
+    _make_employee(db_session, usd, first_name="Bob", email="b@example.com")
+
+    items, _ = list_employees(db_session, sort_by="first_name", sort_order="asc")
+
+    assert [e.first_name for e in items] == ["Alice", "Bob", "Charlie"]
+
+
+def test_list_employees_sorts_by_first_name_descending(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(db_session, usd, first_name="Charlie", email="c@example.com")
+    _make_employee(db_session, usd, first_name="Alice", email="a@example.com")
+    _make_employee(db_session, usd, first_name="Bob", email="b@example.com")
+
+    items, _ = list_employees(db_session, sort_by="first_name", sort_order="desc")
+
+    assert [e.first_name for e in items] == ["Charlie", "Bob", "Alice"]
+
+
+def test_list_employees_sorts_by_hire_date(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(db_session, usd, email="a@example.com", hire_date=date(2022, 1, 1))
+    _make_employee(db_session, usd, email="b@example.com", hire_date=date(2020, 1, 1))
+    _make_employee(db_session, usd, email="c@example.com", hire_date=date(2024, 1, 1))
+
+    items, _ = list_employees(db_session, sort_by="hire_date", sort_order="asc")
+
+    assert [e.email for e in items] == ["b@example.com", "a@example.com", "c@example.com"]
+
+
+def test_list_employees_sorts_by_salary_uses_inr_equivalent_value(db_session):
+    usd = _create_currency(db_session, code="USD", symbol="$", rate=83)
+    inr = _create_currency(db_session, code="INR", symbol="₹", rate=1)
+    _make_employee(db_session, usd, email="a@example.com", salary_amount=Decimal("20000"))
+    _make_employee(db_session, inr, email="b@example.com", salary_amount=Decimal("800000"))
+    # Raw amounts would sort ascending as [a, b] (20000 < 800000). In INR-
+    # equivalent terms a earns more (20000 * 83 = 1,660,000) than b (800,000),
+    # so the correct ascending order is [b, a] — this fails if the sort ever
+    # regresses to comparing raw salary_amount instead of the converted value.
+
+    items, _ = list_employees(db_session, sort_by="salary_amount", sort_order="asc")
+
+    assert [e.email for e in items] == ["b@example.com", "a@example.com"]
+
+
+def test_list_employees_sorts_by_salary_descending_uses_inr_equivalent_value(db_session):
+    usd = _create_currency(db_session, code="USD", symbol="$", rate=83)
+    inr = _create_currency(db_session, code="INR", symbol="₹", rate=1)
+    _make_employee(db_session, usd, email="a@example.com", salary_amount=Decimal("20000"))
+    _make_employee(db_session, inr, email="b@example.com", salary_amount=Decimal("800000"))
+
+    items, _ = list_employees(db_session, sort_by="salary_amount", sort_order="desc")
+
+    assert [e.email for e in items] == ["a@example.com", "b@example.com"]
