@@ -3,7 +3,7 @@ from decimal import Decimal
 
 import pytest
 
-from app.db import list_employees, update_employee_salary
+from app.db import get_filter_options, list_employees, update_employee_salary
 from app.exceptions import EmployeeNotFoundError, InvalidCurrencyError
 from app.models import Currency, Employee
 from app.schemas import EmployeeUpdate
@@ -260,3 +260,23 @@ def test_list_employees_sorts_by_salary_descending_uses_inr_equivalent_value(db_
     items, _ = list_employees(db_session, sort_by="salary_amount", sort_order="desc")
 
     assert [e.email for e in items] == ["a@example.com", "b@example.com"]
+
+
+def test_get_filter_options_returns_distinct_sorted_values(db_session):
+    usd = _create_currency(db_session)
+    _make_employee(
+        db_session, usd, email="a@example.com", country="United States", department="Engineering", job_title="Software Engineer"
+    )
+    _make_employee(
+        db_session, usd, email="b@example.com", country="India", department="Sales", job_title="Sales Manager"
+    )
+    # Same country/department/role as employee a — should not produce a duplicate.
+    _make_employee(
+        db_session, usd, email="c@example.com", country="United States", department="Engineering", job_title="Software Engineer"
+    )
+
+    options = get_filter_options(db_session)
+
+    assert options["countries"] == ["India", "United States"]
+    assert options["departments"] == ["Engineering", "Sales"]
+    assert options["roles"] == ["Sales Manager", "Software Engineer"]

@@ -8,6 +8,12 @@ const CURRENCIES = [
   { id: 2, code: 'INR', symbol: '₹', exchange_rate_to_inr: '1' },
 ]
 
+const FILTER_OPTIONS = {
+  countries: ['Germany', 'United States'],
+  departments: ['Engineering'],
+  roles: ['Software Engineer'],
+}
+
 const EMPLOYEE = {
   id: 42,
   first_name: 'Jane',
@@ -25,6 +31,9 @@ function mockFetch() {
   return vi.fn((url: string) => {
     if (url.includes('/api/currencies')) {
       return Promise.resolve({ ok: true, json: async () => CURRENCIES })
+    }
+    if (url.includes('/api/employees/filters')) {
+      return Promise.resolve({ ok: true, json: async () => FILTER_OPTIONS })
     }
     return Promise.resolve({
       ok: true,
@@ -66,7 +75,7 @@ describe('EmployeeList', () => {
 
     await waitFor(() => {
       const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
-      const employeeCalls = calls.filter((call) => (call[0] as string).includes('/api/employees'))
+      const employeeCalls = calls.filter((call) => (call[0] as string).includes('/api/employees?'))
       const lastCall = employeeCalls.at(-1)
       expect(lastCall?.[0]).toContain('country=Germany')
     })
@@ -81,7 +90,7 @@ describe('EmployeeList', () => {
 
     await waitFor(() => {
       const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
-      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees?')).at(-1)
       expect(lastCall?.[0]).toContain('sort_by=first_name')
       expect(lastCall?.[0]).toContain('sort_order=asc')
     })
@@ -90,7 +99,7 @@ describe('EmployeeList', () => {
 
     await waitFor(() => {
       const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
-      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees?')).at(-1)
       expect(lastCall?.[0]).toContain('sort_order=desc')
     })
   })
@@ -106,8 +115,27 @@ describe('EmployeeList', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0))
     const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
-    const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees')).at(-1)
+    const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees?')).at(-1)
     expect(lastCall?.[0]).not.toContain('sort_by')
+  })
+
+  it('suggests known countries and applies the pick when Search is clicked', async () => {
+    renderPage()
+    await screen.findByText('Jane')
+
+    const countryInput = screen.getByLabelText('Country')
+    fireEvent.change(countryInput, { target: { value: 'Ger' } })
+
+    expect(await screen.findByRole('option', { name: 'Germany' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('option', { name: 'Germany' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }))
+
+    await waitFor(() => {
+      const calls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls
+      const lastCall = calls.filter((call) => (call[0] as string).includes('/api/employees?')).at(-1)
+      expect(lastCall?.[0]).toContain('country=Germany')
+    })
   })
 
   it('converts the displayed salary when a display currency is chosen', async () => {

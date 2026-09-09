@@ -86,6 +86,16 @@ export function fetchCurrencies(): Promise<Currency[]> {
   return apiGet<Currency[]>('/api/currencies')
 }
 
+export type EmployeeFilterOptions = {
+  countries: string[]
+  departments: string[]
+  roles: string[]
+}
+
+export function fetchEmployeeFilterOptions(): Promise<EmployeeFilterOptions> {
+  return apiGet<EmployeeFilterOptions>('/api/employees/filters')
+}
+
 export function fetchEmployee(id: number): Promise<Employee> {
   return apiGet<Employee>(`/api/employees/${id}`)
 }

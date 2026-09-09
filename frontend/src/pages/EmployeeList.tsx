@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
+import Autocomplete from '@mui/material/Autocomplete'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
@@ -8,8 +9,18 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { DataGrid, type GridColDef, type GridSortModel } from '@mui/x-data-grid'
 import { useNavigate } from 'react-router-dom'
-import { fetchCurrencies, fetchEmployees, type Currency, type Employee, type EmployeeSortField } from '../api/client'
+import {
+  fetchCurrencies,
+  fetchEmployeeFilterOptions,
+  fetchEmployees,
+  type Currency,
+  type Employee,
+  type EmployeeFilterOptions,
+  type EmployeeSortField,
+} from '../api/client'
 import { convertAmount, formatMoney } from '../utils/format'
+
+const EMPTY_FILTER_OPTIONS: EmployeeFilterOptions = { countries: [], departments: [], roles: [] }
 
 const NATIVE_CURRENCY = 'native'
 
@@ -26,6 +37,7 @@ export function EmployeeList() {
   const navigate = useNavigate()
 
   const [currencies, setCurrencies] = useState<Map<number, Currency>>(new Map())
+  const [filterOptions, setFilterOptions] = useState<EmployeeFilterOptions>(EMPTY_FILTER_OPTIONS)
   const [displayCurrencyId, setDisplayCurrencyId] = useState<number | typeof NATIVE_CURRENCY>(NATIVE_CURRENCY)
   const [draftFilters, setDraftFilters] = useState<Filters>(EMPTY_FILTERS)
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
@@ -43,6 +55,11 @@ export function EmployeeList() {
       .then((list) => setCurrencies(new Map(list.map((currency) => [currency.id, currency]))))
       .catch(() => {
         // Salary column falls back to the raw amount with no symbol.
+      })
+    fetchEmployeeFilterOptions()
+      .then(setFilterOptions)
+      .catch(() => {
+        // Filters still work as plain free-text fields, just without suggestions.
       })
   }, [])
 
@@ -123,23 +140,32 @@ export function EmployeeList() {
           value={draftFilters.search}
           onChange={(e) => setDraftFilters({ ...draftFilters, search: e.target.value })}
         />
-        <TextField
-          label="Country"
+        <Autocomplete
+          freeSolo
           size="small"
-          value={draftFilters.country}
-          onChange={(e) => setDraftFilters({ ...draftFilters, country: e.target.value })}
+          sx={{ width: 200 }}
+          options={filterOptions.countries}
+          inputValue={draftFilters.country}
+          onInputChange={(_, newValue) => setDraftFilters({ ...draftFilters, country: newValue })}
+          renderInput={(params) => <TextField {...params} label="Country" />}
         />
-        <TextField
-          label="Department"
+        <Autocomplete
+          freeSolo
           size="small"
-          value={draftFilters.department}
-          onChange={(e) => setDraftFilters({ ...draftFilters, department: e.target.value })}
+          sx={{ width: 200 }}
+          options={filterOptions.departments}
+          inputValue={draftFilters.department}
+          onInputChange={(_, newValue) => setDraftFilters({ ...draftFilters, department: newValue })}
+          renderInput={(params) => <TextField {...params} label="Department" />}
         />
-        <TextField
-          label="Role"
+        <Autocomplete
+          freeSolo
           size="small"
-          value={draftFilters.role}
-          onChange={(e) => setDraftFilters({ ...draftFilters, role: e.target.value })}
+          sx={{ width: 200 }}
+          options={filterOptions.roles}
+          inputValue={draftFilters.role}
+          onInputChange={(_, newValue) => setDraftFilters({ ...draftFilters, role: newValue })}
+          renderInput={(params) => <TextField {...params} label="Role" />}
         />
         <Button variant="contained" onClick={applyFilters}>
           Search

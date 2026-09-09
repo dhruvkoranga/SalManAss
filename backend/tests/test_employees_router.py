@@ -135,3 +135,49 @@ def test_get_employees_rejects_unknown_sort_by(client):
 def test_get_employees_rejects_unknown_sort_order(client):
     response = client.get("/api/employees?sort_order=sideways")
     assert response.status_code == 422
+
+
+def test_get_employee_filters_returns_distinct_sorted_values(client, db_session):
+    currency = Currency(code="USD", symbol="$", exchange_rate_to_inr=83)
+    db_session.add(currency)
+    db_session.flush()
+    db_session.add_all(
+        [
+            Employee(
+                first_name="A",
+                last_name="One",
+                email="a@example.com",
+                country="United States",
+                department="Engineering",
+                job_title="Software Engineer",
+                salary_amount=Decimal("100000"),
+                currency_id=currency.id,
+                hire_date=date(2023, 1, 15),
+            ),
+            Employee(
+                first_name="B",
+                last_name="Two",
+                email="b@example.com",
+                country="India",
+                department="Sales",
+                job_title="Sales Manager",
+                salary_amount=Decimal("100000"),
+                currency_id=currency.id,
+                hire_date=date(2023, 1, 15),
+            ),
+        ]
+    )
+    db_session.commit()
+
+    response = client.get("/api/employees/filters")
+
+    assert response.status_code == 200
+    body = response.json()
+    # A 200 with the correct body also proves /filters is matched as its own
+    # route, not swallowed by /{employee_id}: int (which would 422 trying to
+    # parse "filters" as an int).
+    assert body == {
+        "countries": ["India", "United States"],
+        "departments": ["Engineering", "Sales"],
+        "roles": ["Sales Manager", "Software Engineer"],
+    }

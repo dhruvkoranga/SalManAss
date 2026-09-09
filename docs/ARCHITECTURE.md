@@ -76,7 +76,12 @@ backend/
 │   │                      framework-agnostic, translated to HTTP by routers
 │   ├── db.py             engine/session setup + data-access functions
 │   ├── routers/
-│   │   ├── employees.py
+│   │   ├── employees.py  includes GET /filters (distinct country/department/
+│   │   │                 role values, for the frontend's autocomplete
+│   │   │                 suggestions) — registered *before* GET /{employee_id}
+│   │   │                 since FastAPI matches routes in registration order
+│   │   │                 and the dynamic route would otherwise 422 trying to
+│   │   │                 parse "filters" as an int
 │   │   ├── analytics.py
 │   │   └── currencies.py  read-only list (id, code, symbol,
 │   │                      exchange_rate_to_inr) — backs the edit form's
@@ -129,7 +134,13 @@ frontend/
     │   ├── EmployeeList.tsx     MUI DataGrid, server-side pagination/filter/sort,
     │   │                        "Display Currency" selector (client-side
     │   │                        conversion — doesn't touch the sort, which
-    │   │                        always ranks by real INR-equivalent value)
+    │   │                        always ranks by real INR-equivalent value),
+    │   │                        MUI Autocomplete (freeSolo) on the Country/
+    │   │                        Department/Role filters — suggestions come
+    │   │                        from GET /api/employees/filters (the live
+    │   │                        distinct values) rather than a hardcoded
+    │   │                        list, since these fields are free-text and
+    │   │                        editable, so a static list would go stale
     │   ├── EmployeeDetail.tsx   view/edit salary
     │   └── Analytics.tsx        the "how do we pay people" view
     └── components/

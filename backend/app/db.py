@@ -122,6 +122,14 @@ def list_employees(
     return list(items), total
 
 
+def get_filter_options(session: Session) -> dict:
+    return {
+        "countries": list(session.scalars(select(Employee.country).distinct().order_by(Employee.country))),
+        "departments": list(session.scalars(select(Employee.department).distinct().order_by(Employee.department))),
+        "roles": list(session.scalars(select(Employee.job_title).distinct().order_by(Employee.job_title))),
+    }
+
+
 def get_analytics_summary(session: Session) -> dict:
     rows = session.execute(
         select(

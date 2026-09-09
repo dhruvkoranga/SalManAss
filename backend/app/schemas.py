@@ -42,6 +42,12 @@ class EmployeeListResponse(BaseModel):
     page_size: int
 
 
+class EmployeeFilterOptions(BaseModel):
+    countries: list[str]
+    departments: list[str]
+    roles: list[str]
+
+
 class GroupStat(BaseModel):
     group: str
     average_salary_inr: Decimal
