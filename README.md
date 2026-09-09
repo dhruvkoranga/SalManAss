@@ -115,6 +115,7 @@ idle (the first request after that takes ~30-60s to wake back up). See
 - [ ] Payroll processing / disbursement
 - [ ] Excel import
 - [ ] Full audit-log UI
+- [ ] Simple user query (natural-language) to fetch employee records — see docs/APPROACH.md
 
 ### Done (project setup)
 - [x] Git repo initialized, remote configured

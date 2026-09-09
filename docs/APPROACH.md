@@ -17,6 +17,16 @@ Each entry should be short: what was decided, why, and what alternative was cons
 
 ---
 
+## 2026-09-10 — Deferred: natural-language employee query
+
+**Decision:** Don't build a free-form/natural-language query feature for fetching employee records (e.g. asking "list all engineers in Germany earning over ₹20L" and having it answered directly) in this iteration.
+
+**Why:** Answering an open-ended query well means passing a non-trivial slice of the 10,000-row dataset to an LLM as context, and the token cost isn't fixed — it scales with how broad or vague the query is. A narrow query might stay cheap; a broad one ("show everyone above median pay") could need most of the dataset in context, making per-request cost unpredictable. The structured filter/sort/search UI already covers the day-to-day query patterns an HR manager needs, at a small, predictable cost (a plain SQL query, not an LLM call).
+
+**Alternative considered:** None evaluated in depth — this is deferred, not rejected. Worth revisiting later with a scoped approach (e.g. querying only pre-aggregated summary data, or capping how many rows can be pulled into context) rather than open-ended free-form querying over the full dataset.
+
+---
+
 ## 2026-09-09 — Render deploy: free tier, SQLite reseeded on every boot
 
 **Decision:** Deploy both services on Render's free tier (`render.yaml` at repo root: `salmanass-backend` as a Python web service, `salmanass-frontend` as a static site). The backend's start command runs `alembic upgrade head && python -m scripts.seed` before `uvicorn` on every boot, so the app always comes up with a full 10,000-row dataset.
